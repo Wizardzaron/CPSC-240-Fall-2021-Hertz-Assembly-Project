@@ -1,0 +1,211 @@
+     1                                  extern printf
+     2                                  extern fgets
+     3                                  extern isfloat
+     4                                  extern atof
+     5                                  extern stdin
+     6                                  extern scanf
+     7                                  global Inputs
+     8                                  
+     9                                  max_position_size equ 20
+    10                                  
+    11                                  section .data
+    12                                  align 16
+    13 00000000 57652077696C6C2066-     	Welcome db "We will find your power",10,0
+    13 00000009 696E6420796F757220-
+    13 00000012 706F7765720A00     
+    14 00000019 506C6561736520656E-     	Occupation db "Please enter your name and occupation:", 10, 0
+    14 00000022 74657220796F757220-
+    14 0000002B 6E616D6520616E6420-
+    14 00000034 6F636375706174696F-
+    14 0000003D 6E3A0A00           
+    15 00000041 506C6561736520656E-     	ResistanceandCurrent db "Please enter the resistance in your circuit first and then enter the current in this circuit:",10,0
+    15 0000004A 746572207468652072-
+    15 00000053 6573697374616E6365-
+    15 0000005C 20696E20796F757220-
+    15 00000065 636972637569742066-
+    15 0000006E 6972737420616E6420-
+    15 00000077 7468656E20656E7465-
+    15 00000080 722074686520637572-
+    15 00000089 72656E7420696E2074-
+    15 00000092 686973206369726375-
+    15 0000009B 69743A0A00         
+    16                                  	;Current db "Please enter the current flow in this circuit:" ,10,0
+    17 000000A0 57656C636F6D652025-     	Spewout db "Welcome %s" , 10 ,0
+    17 000000A9 730A00             
+    18 000000AC 54686520696E707574-     	error_message db "The input is invalid. Returning to main" ,10,0
+    18 000000B5 20697320696E76616C-
+    18 000000BE 69642E205265747572-
+    18 000000C7 6E696E6720746F206D-
+    18 000000D0 61696E0A00         
+    19 000000D5 257300                  	stringformat db "%s", 0
+    20 000000D8 5468616E6B20796F75-     	Goodbye db "Thank you %s. Your power consumption is %lf",10,0
+    20 000000E1 2025732E20596F7572-
+    20 000000EA 20706F77657220636F-
+    20 000000F3 6E73756D7074696F6E-
+    20 000000FC 20697320256C660A00 
+    21 00000105 90<rept>                align 64
+    22                                  
+    23                                  segment .bss
+    24 00000000 <res 00000014>          occupation resb max_position_size
+    25 00000014 <res 00000010>          array resq 2 ;we create this array to help store our inputs when going through our function loops 
+    26                                  
+    27                                  segment .text
+    28                                  
+    29                                  Inputs:
+    30                                  
+    31 00000000 55                      push rbp
+    32 00000001 4889E5                  mov rbp,rsp
+    33 00000004 53                      push rbx
+    34 00000005 51                      push rcx
+    35 00000006 52                      push rdx
+    36 00000007 57                      push rdi
+    37 00000008 56                      push rsi
+    38 00000009 4150                    push r8
+    39 0000000B 4151                    push r9
+    40 0000000D 4152                    push r10
+    41 0000000F 4153                    push r11
+    42 00000011 4154                    push r12
+    43 00000013 4155                    push r13
+    44 00000015 4156                    push r14
+    45 00000017 4157                    push r15
+    46 00000019 9C                      pushf
+    47                                  
+    48                                  ;Welcome_message
+    49 0000001A B800000000              mov qword rax, 0
+    50 0000001F 48BF-                   mov rdi, stringformat
+    50 00000021 [D500000000000000] 
+    51 00000029 48BE-                   mov rsi, Welcome
+    51 0000002B [0000000000000000] 
+    52 00000033 E8(00000000)            call printf
+    53                                  
+    54                                  ;Name_message
+    55 00000038 B800000000              mov qword rax, 0
+    56 0000003D 48BF-                   mov rdi, stringformat
+    56 0000003F [D500000000000000] 
+    57 00000047 48BE-                   mov rsi, Occupation
+    57 00000049 [1900000000000000] 
+    58 00000051 E8(00000000)            call printf
+    59                                  
+    60                                  ;input_message
+    61 00000056 B800000000              mov qword rax, 0
+    62 0000005B 48BF-                   mov rdi, occupation
+    62 0000005D [0000000000000000] 
+    63 00000065 BE14000000              mov rsi, max_position_size
+    64 0000006A 488B1425[00000000]      mov rdx, [stdin]
+    65 00000072 E8(00000000)            call fgets
+    66                                  
+    67                                  ;Output_name
+    68 00000077 B800000000              mov qword rax, 0
+    69 0000007C 48BF-                   mov rdi, Spewout
+    69 0000007E [A000000000000000] 
+    70 00000086 48BE-                   mov rsi, occupation
+    70 00000088 [0000000000000000] 
+    71 00000090 E8(00000000)            call printf
+    72                                  
+    73 00000095 49BE000000000000F0-     mov r14,0x3ff0000000000000 ;used to flag input if they're wrong when putting floats into registers we need to but in its hexadecimal ieee-754 format
+    73 0000009E 3F                 
+    74 0000009F 41BF00000000            mov r15,0 ;used to return a value of 0 back to the c file if the input is invalid
+    75                                  
+    76                                  
+    77                                  inputnumbers:
+    78                                  
+    79                                  ;resistance_and_current_message
+    80 000000A5 B800000000              mov qword rax, 0
+    81 000000AA 48BF-                   mov rdi, stringformat
+    81 000000AC [D500000000000000] 
+    82 000000B4 48BE-                   mov rsi, ResistanceandCurrent
+    82 000000B6 [4100000000000000] 
+    83 000000BE E8(00000000)            call printf
+    84                                  
+    85 000000C3 6A00                    push qword 0
+    86                                  
+    87 000000C5 6A00                    push qword 0
+    88 000000C7 48BF-                   mov rdi, stringformat ;puts our input into to string so that way our isfloat function will recognize as such and therefore have an easier time to validate
+    88 000000C9 [D500000000000000] 
+    89 000000D1 4889E6                  mov rsi, rsp ;points rsi to top of the to place input value of scanf
+    90 000000D4 B801000000              mov rax, 1 ;set rax to 1 to let scanf know its going to be a incoming float
+    91 000000D9 E8(00000000)            call scanf
+    92                                  
+    93                                  ;float_validation
+    94 000000DE 4889E7                  mov rdi, rsp
+    95 000000E1 B800000000              mov rax, 0
+    96 000000E6 E8(00000000)            call isfloat
+    97                                  
+    98 000000EB 4883F800                cmp rax, 0 ;checks to see if isfloat function returned false and if so we return a value of zero and leave the asm file
+    99 000000EF 7443                    je invalid_input
+   100                                  
+   101 000000F1 B801000000              mov rax, 1 ;Set rax to 1 to allow function to return float to xmm0 register
+   102 000000F6 E8(00000000)            call atof ;c library function
+   103                                  
+   104 000000FB 66490F7EC4              movq r12, xmm0
+   105 00000100 4E8924FD[14000000]      mov [array + 8*r15], r12
+   106                                  
+   107 00000108 4983C701                add r15, 1 ;think of like incrementing through a loop
+   108 0000010C 4983FF02                cmp r15, 2 ;once the r15 register is equal to 2 then we mov on to multiplying and return>
+   109                                  
+   110 00000110 58                      pop rax ;pops the offset before scanf
+   111                                  
+   112 00000111 58                      pop rax
+   113                                  
+   114                                  
+   115 00000112 7591                    jne inputnumbers
+   116                                  
+   117 00000114 F2440F103C25-           movsd xmm15,qword[array] ;since we stored the float into the array  we move it to xmm15 for resistance
+   117 0000011A [14000000]         
+   118                                  
+   119 0000011E F2440F100C25-           movsd xmm9, qword[array+8] ;same with xmm9 but with circuit
+   119 00000124 [1C000000]         
+   120                                  
+   121 00000128 F2450F59FF              mulsd xmm15, xmm15
+   122                                  
+   123 0000012D F2450F59F9              mulsd xmm15, xmm9
+   124                                  
+   125 00000132 EB2C                    jmp valid_inputs
+   126                                  
+   127                                  
+   128                                  invalid_input:
+   129 00000134 58                      pop rax
+   130 00000135 58                      pop rax
+   131                                  
+   132 00000136 B800000000              mov rax, 0
+   133 0000013B 48BF-                   mov rdi, stringformat
+   133 0000013D [D500000000000000] 
+   134 00000145 48BE-                   mov rsi, error_message
+   134 00000147 [AC00000000000000] 
+   135 0000014F E8(00000000)            call printf
+   136                                  
+   137 00000154 664D0F6EFE              movq xmm15, r14  ;Sets return value to 1.0 (using r14)
+   138 00000159 F2410F10C7              movsd xmm0, xmm15
+   139 0000015E EB28                    jmp End_of_function
+   140                                  
+   141                                  valid_inputs:
+   142 00000160 B800000000              mov qword rax, 0
+   143 00000165 F2410F10C7              movsd xmm0, xmm15
+   144 0000016A 48BF-                   mov rdi, Goodbye
+   144 0000016C [D800000000000000] 
+   145 00000174 48BE-                   mov rsi, occupation
+   145 00000176 [0000000000000000] 
+   146 0000017E B801000000              mov rax, 1
+   147 00000183 E8(00000000)            call printf ;this destorys our movsd xmm0,xmm15
+   148                                  
+   149                                  
+   150                                  End_of_function:
+   151 00000188 F2410F10C7              movsd xmm0, xmm15
+   152                                  
+   153                                  
+   154 0000018D 9D                      popf
+   155 0000018E 415F                    pop r15
+   156 00000190 415E                    pop r14
+   157 00000192 415D                    pop r13
+   158 00000194 415C                    pop r12
+   159 00000196 415B                    pop r11
+   160 00000198 415A                    pop r10
+   161 0000019A 4159                    pop r9
+   162 0000019C 4158                    pop r8
+   163 0000019E 5E                      pop rsi
+   164 0000019F 5F                      pop rdi
+   165 000001A0 5A                      pop rdx
+   166 000001A1 59                      pop rcx
+   167 000001A2 5B                      pop rbx
+   168 000001A3 5D                      pop rbp
+   169 000001A4 C3                      ret
